@@ -1,0 +1,14 @@
+*Tie, name=tie1, POSITION TOLERANCE=10, adjust=yes
+TUBE-OUTER, ROTATION-TUBE-INNER
+
+*Surface Interaction, name=INTPROP-1
+*Surface Behavior, pressure-overclosure=LINEAR
+10000,0.1,0.01 
+*Friction
+0.2,
+
+*Contact Pair, interaction=INTPROP-1, type=SURFACE TO SURFACE
+Tube-outer, Fixed-Tube-inner
+
+*Contact Pair, interaction=INTPROP-1, type=SURFACE TO SURFACE
+Tube-outer, Rotation-Circle-up
