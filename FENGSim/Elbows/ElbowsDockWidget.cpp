@@ -172,26 +172,32 @@ void ElbowsDockWidget::onArcMaterialChanged(const QString &material) {
 void ElbowsDockWidget::updateMaterialFile()
 {
     // 获取每个 ComboBox 中当前选择的中文材料
-        QString tubeMaterialCN = ui->comboBox_tubeMaterial->currentText();
-        QString rotaryMaterialCN = ui->comboBox_rotaryMaterial->currentText();
-        QString fixedMaterialCN = ui->comboBox_fixedMaterial->currentText();
-        QString arcMaterialCN = ui->comboBox_arcMaterial->currentText();
+    QString tubeMaterialCN = ui->comboBox_tubeMaterial->currentText();
+    QString rotaryMaterialCN = ui->comboBox_rotaryMaterial->currentText();
+    QString fixedMaterialCN = ui->comboBox_fixedMaterial->currentText();
+    QString arcMaterialCN = ui->comboBox_arcMaterial->currentText();
 
-        // 将中文材料名称转换为英文名称
-        QString tubeMaterial = materialMap.value(tubeMaterialCN, tubeMaterialCN);  // 如果没有找到，使用中文名
-        QString rotaryMaterial = materialMap.value(rotaryMaterialCN, rotaryMaterialCN);
-        QString fixedMaterial = materialMap.value(fixedMaterialCN, fixedMaterialCN);
-        QString arcMaterial = materialMap.value(arcMaterialCN, arcMaterialCN);
+    // 将中文材料名称转换为英文名称
+    QString tubeMaterial = materialMap.value(tubeMaterialCN, tubeMaterialCN);  // 如果没有找到，使用中文名
+    QString rotaryMaterial = materialMap.value(rotaryMaterialCN, rotaryMaterialCN);
+    QString fixedMaterial = materialMap.value(fixedMaterialCN, fixedMaterialCN);
+    QString arcMaterial = materialMap.value(arcMaterialCN, arcMaterialCN);
+
+    //路径问题解决
+    QString appDirPath = QCoreApplication::applicationDirPath();
+    QDir dir(appDirPath);
+    dir.cdUp();
+    QString parentDirPath = dir.absolutePath(); //"/home/ysy/FENGSim/starter"
+    qDebug() << "" << parentDirPath;
 
     // 假设你有一个文件夹，用来存储每个材料对应的文件
-    // 这里的路径是一个假设的路径，可以根据实际情况进行修改
-    QString tubeMaterialFile = "/home/ysy/FENGSim/starter/FENGSim/Elbows/materials/" + tubeMaterial + ".FCMat";
-    QString rotaryMaterialFile = "/home/ysy/FENGSim/starter/FENGSim/Elbows/materials/" + rotaryMaterial + ".FCMat";
-    QString fixedMaterialFile = "/home/ysy/FENGSim/starter/FENGSim/Elbows/materials/" + fixedMaterial + ".FCMat";
-    QString arcMaterialFile = "/home/ysy/FENGSim/starter/FENGSim/Elbows/materials/" + arcMaterial + ".FCMat";
+    QString tubeMaterialFile = parentDirPath + "/FENGSim/Elbows/materials/" + tubeMaterial + ".FCMat";
+    QString rotaryMaterialFile = parentDirPath + "/FENGSim/Elbows/materials/" + rotaryMaterial + ".FCMat";
+    QString fixedMaterialFile = parentDirPath + "/FENGSim/Elbows/materials/" + fixedMaterial + ".FCMat";
+    QString arcMaterialFile = parentDirPath + "/FENGSim/Elbows/materials/" + arcMaterial + ".FCMat";
 
     // 文件路径
-    QString filePath = "/home/ysy/FENGSim/starter/FENGSim/Elbows/config/material.info";
+    QString filePath = parentDirPath + "/FENGSim/Elbows/config/material.info";
 
     // 打开文件
     QFile file(filePath);
@@ -224,6 +230,7 @@ void ElbowsDockWidget::onTubeClicked(){
     QDir dir(appDirPath);
     dir.cdUp();
     QString parentDirPath = dir.absolutePath(); //"/home/ysy/FENGSim/starter"
+    qDebug() << "" << parentDirPath;
     // 设置图片路径
     QString imagePath1 = parentDirPath + "/FENGSim/Elbows/materials/images/" + tubeMaterial + "/1.png";
     QString imagePath2 = parentDirPath + "/FENGSim/Elbows/materials/images/" + tubeMaterial + "/2.png";
@@ -280,23 +287,102 @@ void ElbowsDockWidget::onStepClicked(){
                     .arg(step3, 0, 'g', 6)
                     .arg(step4, 0, 'g', 6);
 
-    QFile file("/home/ysy/FENGSim/starter/FENGSim/Elbows/config/step.info");  // 你可以指定路径
+    //路径问题解决
+    QString appDirPath = QCoreApplication::applicationDirPath();
+    QDir dir(appDirPath);
+    dir.cdUp();
+    QString parentDirPath = dir.absolutePath(); //"/home/ysy/FENGSim/starter"
+    qDebug() << "" << parentDirPath;
+    QString StepFile = parentDirPath + "/FENGSim/Elbows/config/step.info";
+    qDebug() << "" << parentDirPath;
+
+    QFile file(StepFile);  // 你可以指定路径
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         out << output;
         file.close();
+    }else{
+        qWarning() << "Cannot open file for reading:" << file.errorString();
     }
 }
 
-void ElbowsDockWidget::onInpClicked(){
+//void ElbowsDockWidget::onInpClicked(){
+//    // 创建 QProcess 对象
+//    QProcess *process = new QProcess(this);
+//    // 构建 Python 脚本执行的命令
+//    QString pythonCommand = "python3";
+
+//    //路径问题解决
+//    QString appDirPath = QCoreApplication::applicationDirPath();
+//    QDir dir(appDirPath);
+//    dir.cdUp();
+//    QString parentDirPath = dir.absolutePath(); //"/home/ysy/FENGSim/starter"
+//    qDebug() << "" << parentDirPath;
+
+//    QString scriptPath = parentDirPath + "/FENGSim/Elbows/config/GenerateInp.py";
+//    qDebug() << "" << scriptPath;
+//    // 启动 Python 脚本
+//    process->start(pythonCommand, QStringList() << scriptPath);
+//}
+
+void ElbowsDockWidget::onInpClicked() {
     // 创建 QProcess 对象
     QProcess *process = new QProcess(this);
-    // 构建 Python 脚本执行的命令
-    QString pythonCommand = "python3";
-    QString scriptPath = "/home/ysy/FENGSim/starter/FENGSim/Elbows/config/GenerateInp.py";
+
+    // 获取应用程序目录
+    QString appDirPath = QCoreApplication::applicationDirPath();
+    QDir dir(appDirPath);
+    dir.cdUp();  // 切换到父级目录
+    QString parentDirPath = dir.absolutePath();  // "/home/ysy/FENGSim/starter"
+    qDebug() << "Parent Directory Path: " << parentDirPath;
+
+    // 使用 QDir 来拼接路径，避免重复拼接
+    QDir scriptDir(parentDirPath);
+    QString scriptPath = scriptDir.filePath("FENGSim/Elbows/config/GenerateInp.py");
+    qDebug() << "Script Path: " << scriptPath;
+
+    // 设置 QProcess 的工作目录为 Python 脚本所在的目录
+    process->setWorkingDirectory(scriptDir.absolutePath());
+
+    // 确定 Python 解释器的路径
+    QString pythonCommand = "/usr/bin/python3";  // 使用绝对路径来确保正确的解释器
+
     // 启动 Python 脚本
-    process->start(pythonCommand, QStringList() << scriptPath);
+    QStringList arguments;
+    arguments << scriptPath;
+
+    // 输出命令和参数以供调试
+    qDebug() << "Running command: " << pythonCommand;
+    qDebug() << "With arguments: " << arguments;
+
+    // 启动进程
+    process->start(pythonCommand, arguments);
+
+    // 检查进程是否启动成功
+    if (!process->waitForStarted()) {
+        qDebug() << "Failed to start the process!";
+        return;
+    }
+
+    // 捕获进程的标准输出和标准错误
+    connect(process, &QProcess::readyReadStandardOutput, this, [process]() {
+        qDebug() << "Output: " << process->readAllStandardOutput();
+    });
+    connect(process, &QProcess::readyReadStandardError, this, [process]() {
+        qDebug() << "Error: " << process->readAllStandardError();
+    });
+
+    // 等待进程结束并获取退出码
+    process->waitForFinished();
+    int exitCode = process->exitCode();
+    qDebug() << "Process finished with exit code: " << exitCode;
+
+    if (exitCode != 0) {
+        qDebug() << "Python script failed with exit code " << exitCode;
+    }
 }
+
+
 
 
 

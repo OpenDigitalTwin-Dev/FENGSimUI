@@ -433,113 +433,6 @@ void MainWindow::MakeElbowModel(
     double rotary_pos, double fixed_pos,             // 套筒位置（距管体右端的距离）
     double arc_R, double arc_t, double arc_angle // 半圆弧套筒半径、厚度、角度（单位：弧度）
 ) {
-//    vtk_widget->Clear();
-//    const double geo_tol = 1E-3;
-
-//    // Tube (管体)
-//        TopoDS_Shape T_inner = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(0,0,0), gp_Dir(1,0,0)), R_in, length).Shape());
-//        TopoDS_Shape T_outer = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(0,0,0), gp_Dir(1,0,0)), R_out, length).Shape());
-//        TopoDS_Shape* tube = new TopoDS_Shape(BRepAlgoAPI_Cut(T_outer, T_inner).Shape());
-
-//        Cube* F_tube = new Cube(tube);
-//        parts->Add(F_tube);
-//        vtk_widget->Plot(*(F_tube->Value()));
-
-//        // Rotary Sleeve (旋转套)
-//            double rsp_position = length - rotary_pos;
-//            double rsp_R_in = R_out + geo_tol;
-//            double rsp_R_out = rsp_R_in + sleeve_thickness1;
-
-//            TopoDS_Shape RS_inner = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(rsp_position,0,0), gp_Dir(1,0,0)), rsp_R_in, sleeve_length1).Shape());
-//            TopoDS_Shape RS_outer = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(rsp_position,0,0), gp_Dir(1,0,0)), rsp_R_out, sleeve_length1).Shape());
-//            TopoDS_Shape* rotary_sleeve = new TopoDS_Shape(BRepAlgoAPI_Cut(RS_outer, RS_inner).Shape());
-
-//            Cube* F_rotary_sleeve = new Cube(rotary_sleeve);
-//            parts->Add(F_rotary_sleeve);
-//            vtk_widget->Plot(*(F_rotary_sleeve->Value()));
-
-//    // ✅ Rotary 参考点 (Volume2)
-//    double ref2[3] = {
-//        rsp_position + sleeve_length1 / 2.0,
-//        0.0,
-//        0.0
-//    };
-
-//    // Fixed Sleeve (固定套)
-//        double fsp_position = length - fixed_pos;
-//        double fsp_R_in = rsp_R_out + geo_tol;
-//        double fsp_R_out = fsp_R_in + sleeve_thickness;
-
-//        TopoDS_Shape FS_inner = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(fsp_position,0,0), gp_Dir(1,0,0)), fsp_R_in, sleeve_length).Shape());
-//        TopoDS_Shape FS_outer = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(fsp_position,0,0), gp_Dir(1,0,0)), fsp_R_out, sleeve_length).Shape());
-//        TopoDS_Shape* fixed_sleeve = new TopoDS_Shape(BRepAlgoAPI_Cut(FS_outer, FS_inner).Shape());
-
-//        Cube* F_fixed_sleeve = new Cube(fixed_sleeve);
-//        parts->Add(F_fixed_sleeve);
-//        vtk_widget->Plot(*(F_fixed_sleeve->Value()));
-
-
-//    // ✅ Fixed 参考点 (Volume3)
-//    double ref3[3] = {
-//        fsp_position + sleeve_length / 2.0,
-//        0.0,
-//        0.0
-//    };
-
-//    // Semi-circular Sleeve (半圆弧套)
-//        double scsp_position = rsp_position - geo_tol;
-//        double scsp_R_in = R_out + geo_tol;
-//        double scsp_R_out = scsp_R_in + arc_thickness;
-
-//        Handle(Geom_TrimmedCurve) arc_inner = GC_MakeArcOfCircle(gp_Pnt(scsp_position, 0, -scsp_R_in), gp_Pnt(scsp_position, -scsp_R_in, 0), gp_Pnt(scsp_position, 0, scsp_R_in));
-//        Handle(Geom_TrimmedCurve) arc_outer = GC_MakeArcOfCircle(gp_Pnt(scsp_position, 0, -scsp_R_out), gp_Pnt(scsp_position, -scsp_R_out, 0), gp_Pnt(scsp_position, 0, scsp_R_out));
-
-//        TopoDS_Edge edge1 = BRepBuilderAPI_MakeEdge(gp_Pnt(scsp_position, 0, -scsp_R_in), gp_Pnt(scsp_position, 0, -scsp_R_out));
-//        TopoDS_Edge edge2 = BRepBuilderAPI_MakeEdge(gp_Pnt(scsp_position, 0, scsp_R_in), gp_Pnt(scsp_position, 0, scsp_R_out));
-//        BRepBuilderAPI_MakeWire mkWire;
-//        mkWire.Add(BRepBuilderAPI_MakeEdge(arc_outer));
-//        mkWire.Add(edge2);
-//        mkWire.Add(BRepBuilderAPI_MakeEdge(arc_inner));
-//        mkWire.Add(edge1);
-//        TopoDS_Wire sectionWire = mkWire.Wire();
-//        TopoDS_Face sectionFace = BRepBuilderAPI_MakeFace(sectionWire);
-
-//        gp_Ax1 rotation_axis(gp_Pnt(scsp_position, -(scsp_R_in + scsp_R_out) / 2 - arc_R, 0), gp_Dir(0, 0, 1));
-//        TopoDS_Shape* arc_sector = new TopoDS_Shape(BRepPrimAPI_MakeRevol(sectionFace, rotation_axis, arc_angle).Shape());
-
-//        Cube* F_arc_sector = new Cube(arc_sector);
-//        parts->Add(F_arc_sector);
-//        vtk_widget->Plot(*(F_arc_sector->Value()));
-
-//    // ✅ Arc 参考点 (Volume4)
-//    double ref4[3] = {
-//        scsp_position,
-//        -arc_R,
-//        0.0
-//    };
-
-//    // 添加旋转套的旋转中心点 (rot2)
-//       double rot2[3] = {
-//           scsp_position,
-//           -arc_R,
-//           0.0
-//       };
-
-//       // 添加固定套的旋转中心点 (rot3) - 使用固定套中心点
-//       double rot3[3] = {
-//           fsp_position + sleeve_length / 2,
-//           0.0,
-//           0.0
-//       };
-
-//       // 添加半圆弧套的旋转中心点 (rot4) - 使用半圆弧套旋转中心
-//       double rot4[3] = {
-//           scsp_position,
-//           -arc_R,
-//           0.0
-//       };
-
-
     vtk_widget->Clear();
     const double geo_tol = 1E-3;
 
@@ -565,105 +458,111 @@ void MainWindow::MakeElbowModel(
         double R, thickness, angle, position, R_out, R_in, ref[3], rot[3];
     } scsp = {arc_R, arc_t, arc_angle, 0.0, 0.0, 0.0, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
 
-            // inner cylinder
-            TopoDS_Shape T_inner = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(0,0,0), gp_Dir(1,0,0)), tp.R_in, tp.length).Shape());
+    // inner cylinder
+    TopoDS_Shape T_inner = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(0,0,0), gp_Dir(1,0,0)), tp.R_in, tp.length).Shape());
 
-            // outer cylinder
-            TopoDS_Shape T_outer = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(0,0,0), gp_Dir(1,0,0)), tp.R_out, tp.length).Shape());
+    // outer cylinder
+    TopoDS_Shape T_outer = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(0,0,0), gp_Dir(1,0,0)), tp.R_out, tp.length).Shape());
 
-            // tube = outer - inner
-            TopoDS_Shape* tube = new TopoDS_Shape(BRepAlgoAPI_Cut(T_outer, T_inner).Shape());  // shouldn't be a temporary variable
+    // tube = outer - inner
+    TopoDS_Shape* tube = new TopoDS_Shape(BRepAlgoAPI_Cut(T_outer, T_inner).Shape());  // shouldn't be a temporary variable
 
-            Cube* F_tube = new Cube(tube);
-            parts->Add(F_tube);
-            vtk_widget->Plot(*(F_tube->Value()));
+    Cube* F_tube = new Cube(tube);
+    parts->Add(F_tube);
+    vtk_widget->Plot(*(F_tube->Value()));
 
-            rsp.position = tp.length - rsp.position;
-            rsp.R_in     = tp.R_out + geo_tol;
-            rsp.R_out    = rsp.R_in + rsp.thickness;
+    rsp.position = tp.length - rsp.position;
+    rsp.R_in     = tp.R_out + geo_tol;
+    rsp.R_out    = rsp.R_in + rsp.thickness;
 
-            rsp.ref[0] = rsp.position + rsp.length/2;
+    rsp.ref[0] = rsp.position + rsp.length/2;
 
-            // inner cylinder
-            TopoDS_Shape RS_inner = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(rsp.position,0,0), gp_Dir(1,0,0)), rsp.R_in, rsp.length).Shape());
+    // inner cylinder
+    TopoDS_Shape RS_inner = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(rsp.position,0,0), gp_Dir(1,0,0)), rsp.R_in, rsp.length).Shape());
 
-            // outer cylinder
-            TopoDS_Shape RS_outer = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(rsp.position,0,0), gp_Dir(1,0,0)), rsp.R_out, rsp.length).Shape());
+    // outer cylinder
+    TopoDS_Shape RS_outer = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(rsp.position,0,0), gp_Dir(1,0,0)), rsp.R_out, rsp.length).Shape());
 
-            // rotary sleeve = RS_outer - T_outer
-            TopoDS_Shape* rotary_sleeve = new TopoDS_Shape(BRepAlgoAPI_Cut(RS_outer, RS_inner).Shape());
+    // rotary sleeve = RS_outer - T_outer
+    TopoDS_Shape* rotary_sleeve = new TopoDS_Shape(BRepAlgoAPI_Cut(RS_outer, RS_inner).Shape());
 
-            Cube* F_rotary_sleeve = new Cube(rotary_sleeve);
-            parts->Add(F_rotary_sleeve);
-            vtk_widget->Plot(*(F_rotary_sleeve->Value()));
+    Cube* F_rotary_sleeve = new Cube(rotary_sleeve);
+    parts->Add(F_rotary_sleeve);
+    vtk_widget->Plot(*(F_rotary_sleeve->Value()));
 
-            fsp.position = tp.length - fsp.position;
-            fsp.R_in     = tp.R_out + geo_tol;
-            fsp.R_out    = rsp.R_in + rsp.thickness;
+    fsp.position = tp.length - fsp.position;
+    fsp.R_in     = tp.R_out + geo_tol;
+    fsp.R_out    = rsp.R_in + rsp.thickness;
 
-            // ref node
-            fsp.ref[0] = fsp.position + fsp.length / 2;
-            fsp.rot[0] = fsp.position + fsp.length / 2;
+    // ref node
+    fsp.ref[0] = fsp.position + fsp.length / 2;
+    fsp.rot[0] = fsp.position + fsp.length / 2;
 
-            // inner cylinder
-            TopoDS_Shape FS_inner = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(fsp.position,0,0), gp_Dir(1,0,0)), fsp.R_in, fsp.length).Shape());
+    // inner cylinder
+    TopoDS_Shape FS_inner = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(fsp.position,0,0), gp_Dir(1,0,0)), fsp.R_in, fsp.length).Shape());
 
-            // outer cylinder
-            TopoDS_Shape FS_outer = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(fsp.position,0,0), gp_Dir(1,0,0)), fsp.R_out, fsp.length).Shape());
+    // outer cylinder
+    TopoDS_Shape FS_outer = TopoDS_Shape(BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(fsp.position,0,0), gp_Dir(1,0,0)), fsp.R_out, fsp.length).Shape());
 
-            // rotary sleeve = RS_outer - T_outer
-            TopoDS_Shape* fixed_sleeve = new TopoDS_Shape(BRepAlgoAPI_Cut(FS_outer, FS_inner).Shape());
+    // rotary sleeve = RS_outer - T_outer
+    TopoDS_Shape* fixed_sleeve = new TopoDS_Shape(BRepAlgoAPI_Cut(FS_outer, FS_inner).Shape());
 
-            Cube* F_fixed_sleeve = new Cube(fixed_sleeve);
-            parts->Add(F_fixed_sleeve);
-            vtk_widget->Plot(*(F_fixed_sleeve->Value()));
+    Cube* F_fixed_sleeve = new Cube(fixed_sleeve);
+    parts->Add(F_fixed_sleeve);
+    vtk_widget->Plot(*(F_fixed_sleeve->Value()));
 
-            // generate arc
-            scsp.position = rsp.position - geo_tol;
-            scsp.R_in     = tp.R_out + geo_tol;
-            scsp.R_out    = scsp.R_in + scsp.thickness;
+    // generate arc
+    scsp.position = rsp.position - geo_tol;
+    scsp.R_in     = tp.R_out + geo_tol;
+    scsp.R_out    = scsp.R_in + scsp.thickness;
 
-            // rot node
-            scsp.rot[0] = scsp.position;
-            scsp.rot[1] = -scsp.R;
-            std::copy(scsp.rot, scsp.rot+3, scsp.ref);
-            std::copy(scsp.rot, scsp.rot+3, rsp.rot);
-
-
-            Handle(Geom_TrimmedCurve) arc_inner = GC_MakeArcOfCircle(gp_Pnt(scsp.position, 0, -scsp.R_in), gp_Pnt(scsp.position, -scsp.R_in, 0), gp_Pnt(scsp.position, 0, scsp.R_in));
-            Handle(Geom_TrimmedCurve) arc_outer = GC_MakeArcOfCircle(gp_Pnt(scsp.position, 0, -scsp.R_out), gp_Pnt(scsp.position, -scsp.R_out, 0), gp_Pnt(scsp.position, 0, scsp.R_out));
-
-            TopoDS_Edge edge1 = BRepBuilderAPI_MakeEdge(
-                gp_Pnt(scsp.position, 0, -scsp.R_in), gp_Pnt(scsp.position, 0, -scsp.R_out)
-            );
-            TopoDS_Edge edge2 = BRepBuilderAPI_MakeEdge(
-                gp_Pnt(scsp.position, 0, scsp.R_in), gp_Pnt(scsp.position, 0, scsp.R_out)
-            );
-            BRepBuilderAPI_MakeWire mkWire;
-            mkWire.Add(BRepBuilderAPI_MakeEdge(arc_outer));
-            mkWire.Add(edge2);
-            mkWire.Add(BRepBuilderAPI_MakeEdge(arc_inner));
-            mkWire.Add(edge1);
-            TopoDS_Wire sectionWire = mkWire.Wire();
-            TopoDS_Face sectionFace = BRepBuilderAPI_MakeFace(sectionWire);
-
-            // rotation
-            gp_Ax1 rotation_axis(
-                gp_Pnt(scsp.position, -scsp.R, 0),  // rotation point
-                gp_Dir(0, 0, 1)                     // rotation direction
-            );
-            TopoDS_Shape* arc_sector = new TopoDS_Shape(
-                BRepPrimAPI_MakeRevol(sectionFace, rotation_axis, scsp.angle).Shape()
-            );
+    // rot node
+    scsp.rot[0] = scsp.position;
+    scsp.rot[1] = -scsp.R;
+    std::copy(scsp.rot, scsp.rot+3, scsp.ref);
+    std::copy(scsp.rot, scsp.rot+3, rsp.rot);
 
 
-            Cube* F_arc_sector = new Cube(arc_sector);
-            parts->Add(F_arc_sector);
-            vtk_widget->Plot(*(F_arc_sector->Value()));
+    Handle(Geom_TrimmedCurve) arc_inner = GC_MakeArcOfCircle(gp_Pnt(scsp.position, 0, -scsp.R_in), gp_Pnt(scsp.position, -scsp.R_in, 0), gp_Pnt(scsp.position, 0, scsp.R_in));
+    Handle(Geom_TrimmedCurve) arc_outer = GC_MakeArcOfCircle(gp_Pnt(scsp.position, 0, -scsp.R_out), gp_Pnt(scsp.position, -scsp.R_out, 0), gp_Pnt(scsp.position, 0, scsp.R_out));
+
+    TopoDS_Edge edge1 = BRepBuilderAPI_MakeEdge(
+        gp_Pnt(scsp.position, 0, -scsp.R_in), gp_Pnt(scsp.position, 0, -scsp.R_out)
+    );
+    TopoDS_Edge edge2 = BRepBuilderAPI_MakeEdge(
+        gp_Pnt(scsp.position, 0, scsp.R_in), gp_Pnt(scsp.position, 0, scsp.R_out)
+    );
+    BRepBuilderAPI_MakeWire mkWire;
+    mkWire.Add(BRepBuilderAPI_MakeEdge(arc_outer));
+    mkWire.Add(edge2);
+    mkWire.Add(BRepBuilderAPI_MakeEdge(arc_inner));
+    mkWire.Add(edge1);
+    TopoDS_Wire sectionWire = mkWire.Wire();
+    TopoDS_Face sectionFace = BRepBuilderAPI_MakeFace(sectionWire);
+
+    // rotation
+    gp_Ax1 rotation_axis(
+        gp_Pnt(scsp.position, -scsp.R, 0),  // rotation point
+        gp_Dir(0, 0, 1)                     // rotation direction
+    );
+    TopoDS_Shape* arc_sector = new TopoDS_Shape(
+        BRepPrimAPI_MakeRevol(sectionFace, rotation_axis, scsp.angle).Shape()
+    );
+
+
+    Cube* F_arc_sector = new Cube(arc_sector);
+    parts->Add(F_arc_sector);
+    vtk_widget->Plot(*(F_arc_sector->Value()));
 
     // ========== 写入 rigidbody.info ==========
+    //路径问题解决
+    QString appDirPath = QCoreApplication::applicationDirPath();
+    QDir dir(appDirPath);
+    dir.cdUp();
+    QString parentDirPath = dir.absolutePath(); //"/home/ysy/FENGSim/starter"
+    qDebug() << "" << parentDirPath;
 
-    QString filename = "/home/ysy/FENGSim/starter/FENGSim/Elbows/config/rigidbody.info";
+    QString filename = parentDirPath + "/FENGSim/Elbows/config/rigidbody.info";
     QFile file(filename);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);

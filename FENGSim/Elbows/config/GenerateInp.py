@@ -496,10 +496,14 @@ def process_step_file(step_file: str,output_file: str):
 if __name__ == "__main__":
     # 示例用法
     print("=== Abaqus & CCX .inp 文件处理工具 ===\n")
-    # 检查当前工作目录
-    print("Current working directory:", os.getcwd())
-    os.chdir("/home/ysy/FENGSim/starter/FENGSim/Elbows/config/")
-    print("Current working directory:", os.getcwd())
+    # 获取当前工作目录
+    current_directory = os.getcwd()
+    print("Current working directory:", current_directory)
+    # 动态拼接路径，确保得到完整路径
+    new_directory = os.path.join(current_directory, "FENGSim/Elbows/config/")
+    # 切换到新的工作目录
+    os.chdir(new_directory)
+    print("New working directory:", os.getcwd())
 
     # 读取配置文件
     with open('config.ini', 'r', encoding='utf-8') as f:
