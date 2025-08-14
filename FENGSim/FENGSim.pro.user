@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.13.1, 2025-08-05T15:33:49. -->
+<!-- Written by QtCreator 4.13.1, 2025-08-14T10:32:50. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -322,7 +322,6 @@
     <value type="bool" key="RunConfiguration.UseMultiProcess">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/ysy/FENGSim/starter/build-FENGSim-Desktop_Qt_5_12_12_GCC_64bit-Debug</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>
@@ -362,7 +361,6 @@
    <value type="QString">ProjectExplorer.Project.Target.0/ProjectExplorer.Target.RunConfiguration.0</value>
    <value type="QString">ProjectExplorer.Project.Target.0/ProjectExplorer.Target.RunConfiguration.0/ProjectExplorer.ProjectConfiguration.Id</value>
    <value type="QString">ProjectExplorer.Project.Target.0/ProjectExplorer.Target.RunConfiguration.0/ProjectExplorer.RunConfiguration.BuildKey</value>
-   <value type="QString">ProjectExplorer.Project.Target.0/ProjectExplorer.Target.RunConfiguration.0/RunConfiguration.WorkingDirectory.default</value>
   </valuelist>
  </data>
  <data>

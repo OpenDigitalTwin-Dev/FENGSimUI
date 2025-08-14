@@ -11,6 +11,8 @@
 #include <vtkAutoInit.h>
 #include "vtkOrientationMarkerWidget.h"
 #include "vtkLight.h"
+#include <vtkTransform.h>
+#include <vtkTransformPolyDataFilter.h>
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
 VTK_MODULE_INIT(vtkInteractionStyle);
 VTK_MODULE_INIT(vtkRenderingFreeType)
@@ -678,32 +680,22 @@ void VTKWidget::ImportSTLFile(std::string name)
 #include "vtkScalarBarActor.h"
 #include "vtkExtractTensorComponents.h"
 #include "vtkDoubleArray.h"
+#include <vtkXMLUnstructuredGridReader.h>
+#include <vtkColorSeries.h>
+
 
 void VTKWidget::ImportVTKFile(std::string name, int type, int n)
 {
     fstream _file;
     _file.open(name, ios::in);
     if (!_file) return;
-    // read a vtk file
-    vtkSmartPointer<vtkUnstructuredGridReader> reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
+    // 使用类成员变量 reader
+    reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
     reader->SetFileName(name.c_str());
-    //reader->ReadAllScalarsOn();
     reader->Update();
 
-    //std::cout << reader->GetOutput()->GetCellData()->GetTensors()->GetSize() << std::endl;
-
-
-    //    vtkSmartPointer<vtkExtractTensorComponents> extract = vtkSmartPointer<vtkExtractTensorComponents>::New();
-    //    extract->SetInputConnection(reader->GetOutputPort());
-    //    extract->ExtractScalarsOn();
-    //    extract->SetScalarModeToComponent();
-    //    extract->SetScalarComponents(0,0);
-    //    extract->Update();
-    //    std::cout << extract->GetOutput()->GetPointData()->GetScalars()->GetSize() << std::endl;
-    //    reader->GetOutput()->GetCellData()->SetScalars(extract->GetOutput()->GetCellData()->GetScalars());
-
     QString color_name;
-    color_name = QString("displacement");
+    color_name = QString(" Solid ");
 
     if (n>0) {
         vtkSmartPointer<vtkDoubleArray> values =
@@ -724,12 +716,6 @@ void VTKWidget::ImportVTKFile(std::string name, int type, int n)
             color_name = QString("stress");
     }
 
-
-
-
-
-
-
     // mapper
     vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
     mapper->SetInputConnection(reader->GetOutputPort());
@@ -749,27 +735,251 @@ void VTKWidget::ImportVTKFile(std::string name, int type, int n)
     scalarBar->SetNumberOfLabels(10);
     scalarBar->SetDragable(true);
 
+    // 统一字体大小
+    scalarBar->GetLabelTextProperty()->SetFontSize(24);  // 设置标签字体大小
+    scalarBar->GetTitleTextProperty()->SetFontSize(24);  // 设置标题字体大小
+
+    // 统一颜色条大小
+    scalarBar->SetWidth(0.1);  // 设置颜色条宽度（按比例）
+    scalarBar->SetHeight(0.8);  // 设置颜色条高度（按比例）
+
 
     // actor
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
     actor->SetMapper(mapper);
     actor->GetProperty()->EdgeVisibilityOn();
     actor->GetProperty()->SetAmbient(0.25);
-    // actor->GetProperty()->SetFrontfaceCulling(1); // shit this is OK, check it for long time
-    // actor->GetProperty()->SetOpacity(100.0);
-    //actor->GetProperty()->SetEdgeColor(255.0/255.0,255.0/255.0,255.0/255.0);
+
     // renderer
     renderer->AddActor(actor);
     renderer->AddActor2D(scalarBar);
-    //renderer->ResetCamera();
-    // Automatically set up the camera based on the visible actors.
-    // The camera will reposition itself to view the center point of the actors,
-    // and move along its initial view plane normal (i.e., vector defined from camera position to focal point)
-    // so that all of the actors can be seen.
     renderer->ResetCameraClippingRange();
-    // Reset the camera clipping range based on the bounds of the visible actors.
-    // This ensures that no props are cut off
-    // redraw
+
+    GetRenderWindow()->Render();
+}
+
+//void VTKWidget::updateDisplay(int type) {
+//    if (!reader) {
+//        std::cerr << "Reader is not initialized!" << std::endl;
+//        return;
+//    }
+
+//    vtkSmartPointer<vtkDataArray> selectedScalar;
+//    QString color_name = "default";
+//    bool useScalar = true; // 是否使用标量数据着色
+
+//    // 2. 根据类型选择标量数据
+//    if (type == 0) {
+//        // 仅显示网格，不使用标量
+//        selectedScalar = nullptr;
+//        color_name = "Solid";
+//        useScalar = false;
+//    } else {
+//        if (type == 1) {
+//            selectedScalar = reader->GetOutput()->GetPointData()->GetArray("ERROR");
+//            color_name = "ERROR";
+//        } else if (type == 2) {
+//            selectedScalar = reader->GetOutput()->GetPointData()->GetArray("S");
+//            color_name = "S";
+//        } else if (type == 3) {
+//            selectedScalar = reader->GetOutput()->GetPointData()->GetArray("S_Mises");
+//            color_name = "S_Mises";
+//        } else if (type == 4) {
+//            selectedScalar = reader->GetOutput()->GetPointData()->GetArray("S_Principal");
+//            color_name = "S_Principal";
+//        } else if (type == 5) {
+//            selectedScalar = reader->GetOutput()->GetPointData()->GetArray("U");
+//            color_name = "U";
+//        }
+
+//        // 检查标量数据是否有效（非type=0时）
+//        if (!selectedScalar) {
+//            std::cerr << "No valid scalar data for type " << type << std::endl;
+//            // 可选： fallback到网格模式
+//            useScalar = false;
+//            color_name = "Solid";
+//        }
+//    }
+
+//    // 3. 创建映射器并关联数据
+//    vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
+//    mapper->SetInputConnection(reader->GetOutputPort());
+
+//    // 4. 处理标量数据（绑定到映射器并设置颜色映射）
+//    vtkSmartPointer<vtkLookupTable> lut = vtkSmartPointer<vtkLookupTable>::New();
+//    if (useScalar && selectedScalar) {
+//        // 4.1 绑定标量数组到映射器
+//        mapper->SetScalarModeToUsePointData(); // 使用点数据中的标量
+//        mapper->SelectColorArray(selectedScalar->GetName()); // 显式指定要使用的数组名称
+
+//        // 4.2 处理向量类型（多分量）数据
+//        if (selectedScalar->GetNumberOfComponents() > 1) {
+//            mapper->SetScalarModeToUsePointFieldData(); // 处理字段数据中的向量
+//            //mapper->SetVectorModeToMagnitude(); // 用向量模长作为着色值（关键！）
+//        }
+
+//        // 4.3 设置标量范围和颜色映射
+//        double* range = selectedScalar->GetRange();
+//        if (range[0] == range[1]) { // 处理无效范围
+//            range[0] -= 0.1;
+//            range[1] += 0.1;
+//        }
+//        mapper->SetScalarRange(range[0], range[1]);
+
+//        // 配置颜色表（从蓝到红）
+//        lut->SetHueRange(0.666667, 0.0); // 蓝色(0.666)到红色(0.0)
+//        lut->Build();
+//        mapper->SetLookupTable(lut);
+
+//        // 4.4 创建标量条（颜色图例）
+//        scalarBar->SetLookupTable(lut);
+//        scalarBar->SetTitle(color_name.toStdString().c_str());
+//        scalarBar->SetNumberOfLabels(10);
+//        scalarBar->SetDragable(true);
+//        renderer->AddActor2D(scalarBar);
+//    } else {
+//        // 不使用标量时，用单一颜色显示网格
+//        mapper->SetScalarVisibility(false); // 关闭标量着色
+//    }
+
+//    // 5. 创建Actor并添加到渲染器
+//    vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+//    actor->SetMapper(mapper);
+//    actor->GetProperty()->EdgeVisibilityOn(); // 显示网格边缘
+//    actor->GetProperty()->SetAmbient(0.25);
+//    if (!useScalar) {
+//        actor->GetProperty()->SetColor(0.8, 0.8, 0.8); // 灰色网格（无标量时）
+//    }
+
+//    renderer->AddActor(actor);
+//    renderer->ResetCameraClippingRange();
+
+//    // 6. 渲染更新
+//    GetRenderWindow()->Render();
+//}
+
+void VTKWidget::updateDisplay(int type) {
+    if (!reader) {
+        std::cerr << "Reader is not initialized!" << std::endl;
+        return;
+    }
+
+    vtkSmartPointer<vtkDataArray> selectedScalar;
+    QString color_name = "Solid";
+    bool useScalar = true;
+
+    // 1. 标量数据选择逻辑保持不变
+    if (type == 0) {
+        selectedScalar = nullptr;
+        color_name = " Solid ";
+        useScalar = false;
+        // 2. 处理 type == 0 时的颜色条恢复到初始状态
+        scalarBar->SetVisibility(false);  // 隐藏颜色条
+        scalarBar->GetTitleTextProperty()->SetFontSize(12);  // 恢复字体大小
+        scalarBar->GetLabelTextProperty()->SetFontSize(12);  // 恢复标签字体大小
+        scalarBar->SetWidth(0.02);  // 恢复颜色条宽度
+        scalarBar->SetHeight(0.8);  // 恢复颜色条高度
+    } else {
+    if (type == 1) {
+        selectedScalar = reader->GetOutput()->GetPointData()->GetArray("ERROR");
+        color_name = " ERROR ";
+    } else if (type == 2) {
+        selectedScalar = reader->GetOutput()->GetPointData()->GetArray("S");
+        color_name = " Stress ";
+    } else if (type == 3) {
+        selectedScalar = reader->GetOutput()->GetPointData()->GetArray("S_Mises");
+        color_name = " S_Mises ";
+    } else if (type == 4) {
+        selectedScalar = reader->GetOutput()->GetPointData()->GetArray("S_Principal");
+        color_name = "S_Principal";
+    } else if (type == 5) {
+        selectedScalar = reader->GetOutput()->GetPointData()->GetArray("U");
+        color_name = "     U     ";
+    }
+
+    // 检查标量数据是否有效（非type=0时）
+    if (!selectedScalar) {
+        std::cerr << "No valid scalar data for type " << type << std::endl;
+        // 可选： fallback到网格模式
+        useScalar = false;
+        color_name = "Solid";
+    }
+    }
+
+    vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
+    mapper->SetInputConnection(reader->GetOutputPort());
+
+    // 2. 关键改进：重构标量数据处理逻辑
+    if (useScalar && selectedScalar) {
+        int numComponents = selectedScalar->GetNumberOfComponents();
+
+        // 2.1 设置标量可见性和选择数组
+        mapper->SetScalarVisibility(true);
+        mapper->SelectColorArray(selectedScalar->GetName());
+
+        // 2.2 根据分量数采用不同处理策略
+        if (numComponents == 1) {
+            // 单分量标量（如S_Mises）
+            mapper->SetScalarModeToUsePointFieldData();
+        } else {
+            // 多分量数据（如位移U）
+            mapper->SetScalarModeToUsePointFieldData();
+
+            // 关键修复：使用分量模长进行着色
+            //mapper->SetVectorModeToMagnitude();  // 必须设置！
+        }
+
+        // 2.3 标量范围处理
+        double range[2];
+        selectedScalar->GetRange(range);  // 多分量数据自动返回模长范围
+
+        // 处理无效范围
+        if (range[0] >= range[1]) {
+            range[0] = 0;
+            range[1] = 1;
+        }
+        mapper->SetScalarRange(range[0], range[1]);
+
+        // 2.4 颜色表配置
+        vtkSmartPointer<vtkLookupTable> lut = vtkSmartPointer<vtkLookupTable>::New();
+        lut->SetHueRange(0.666667, 0.0);  // Blue to Red
+        lut->SetVectorModeToMagnitude();  // 确保颜色表匹配向量模式
+        lut->Build();
+        mapper->SetLookupTable(lut);
+
+        // 2.5 标量条配置
+        scalarBar->SetLookupTable(lut);
+        scalarBar->SetTitle(color_name.toStdString().c_str());
+        scalarBar->SetNumberOfLabels(10);
+        scalarBar->SetDragable(true);
+
+        // 统一字体大小
+        scalarBar->GetLabelTextProperty()->SetFontSize(24);  // 设置标签字体大小
+        scalarBar->GetTitleTextProperty()->SetFontSize(24);  // 设置标题字体大小
+
+        // 设置统一的字体大小（固定大小）
+                scalarBar->GetTitleTextProperty()->SetFontSize(24);
+
+        // 统一颜色条大小
+        scalarBar->SetWidth(0.1);  // 设置颜色条宽度（按比例）
+        scalarBar->SetHeight(0.8);  // 设置颜色条高度（按比例）
+
+        renderer->AddActor2D(scalarBar);
+    } else {
+        mapper->SetScalarVisibility(false);
+    }
+
+    // 3. 创建Actor（保持不变）
+    vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+    actor->SetMapper(mapper);
+    actor->GetProperty()->EdgeVisibilityOn();
+    actor->GetProperty()->SetAmbient(0.25);
+    if (!useScalar) {
+        actor->GetProperty()->SetColor(0.8, 0.8, 0.8);
+    }
+
+    renderer->AddActor(actor);
+    renderer->ResetCameraClippingRange();
     GetRenderWindow()->Render();
 }
 

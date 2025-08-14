@@ -28,11 +28,13 @@
 #include "vtkTransformFilter.h"
 #include "vtkVoxelGrid.h"
 #include "vtkScalarBarActor.h"
+#include <vtkUnstructuredGridReader.h>
 
 class VTKWidget : public QVTKOpenGLWidget
 {
 public:
     vtkNew<vtkScalarBarActor> scalarBar;
+    vtkSmartPointer<vtkUnstructuredGridReader> reader; // 作为类的成员变量
 
     VTKWidget(QWidget *parent = 0);
     // add
@@ -58,6 +60,7 @@ public:
     void Reset ();
     void Clear ();
     void ImportVTKFile (std::string name, int type=0, int n=0);
+    void updateDisplay(int type);
 
 
     void ImportVTKFileCloudColorFinal(double t=0.05);

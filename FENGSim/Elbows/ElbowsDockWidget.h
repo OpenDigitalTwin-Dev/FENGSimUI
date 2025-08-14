@@ -2,6 +2,14 @@
 #define ELBOWSDOCKWIDGET_H
 
 #include <QDockWidget>
+#include <QVTKOpenGLWidget.h>  // 添加 QVTKOpenGLWidget
+#include <vtkSmartPointer.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkUnstructuredGridReader.h>
+#include <vtkDataSetMapper.h>
+#include <vtkActor.h>
 
 #include "MainWindow.h"
 #include "Mesh/MeshThread1.h"
@@ -17,7 +25,6 @@ class ElbowsDockWidget : public QDockWidget
 public:
     explicit ElbowsDockWidget(QWidget *parent, MainWindow* _mainwindow);
     ~ElbowsDockWidget();
-
 
 signals:
     void confirmParameters(double R_out, double R_in, double length,
@@ -45,6 +52,10 @@ private slots:
     void onGenerateMeshClicked();
     void onMeshPlot();
     void onInpClicked();
+
+    void onVTKClicked();
+
+    void onDataTypeChanged(int index);
 
 
 private:

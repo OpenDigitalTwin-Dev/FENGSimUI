@@ -47,6 +47,11 @@ ElbowsDockWidget::ElbowsDockWidget(QWidget *parent, MainWindow* _mainwindow)
     connect(ui->comboBox_arcMaterial, &QComboBox::currentTextChanged,
             this, &ElbowsDockWidget::onArcMaterialChanged);
 
+    //连接数据类型 ComboBox 的信号到槽函数
+    connect(ui->comboBox_dataType, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &ElbowsDockWidget::onDataTypeChanged);
+
+
     // 连接按钮点击事件
     connect(ui->pushButton_confirm, &QPushButton::clicked, this, &ElbowsDockWidget::onConfirmClicked);
 
@@ -55,6 +60,8 @@ ElbowsDockWidget::ElbowsDockWidget(QWidget *parent, MainWindow* _mainwindow)
     connect(ui->pushButton_step, &QPushButton::clicked, this, &ElbowsDockWidget::onStepClicked);
     connect(ui->pushButton_generateMesh, &QPushButton::clicked, this, &ElbowsDockWidget::onGenerateMeshClicked);
     connect(ui->pushButton_inp, &QPushButton::clicked, this, &ElbowsDockWidget::onInpClicked);
+
+    connect(ui->pushButton_openVTK, &QPushButton::clicked, this, &ElbowsDockWidget::onVTKClicked);
 
 
 
@@ -381,6 +388,35 @@ void ElbowsDockWidget::onInpClicked() {
         qDebug() << "Python script failed with exit code " << exitCode;
     }
 }
+
+void ElbowsDockWidget::onVTKClicked() {
+    // 打开文件对话框，选择文件
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Open VTK File"), "", tr("VTK Files (*.vtk)"));
+
+    // 如果文件路径不为空，进行可视化展示
+    if (!filePath.isEmpty()) {
+        mainWindow->vtk_widget->Hide();
+        mainWindow->vtk_widget->ImportVTKFile(filePath.toStdString());
+        mainWindow->vtk_widget->Fit();
+    }
+}
+
+void ElbowsDockWidget::onDataTypeChanged(int index) {
+    // 获取下拉框的选择索引
+    int type = 0;
+    switch (index) {
+        case 0: type = 0; break;  // Solid
+        case 1: type = 1; break;  // ERROR
+        case 2: type = 2; break;  // S
+        case 3: type = 3; break;  // S_Mises
+        case 4: type = 4; break;  // S_Principal
+        case 5: type = 5; break;  // U
+    }
+
+    // 调用 vtk_widget 中的方法更新显示
+    mainWindow->vtk_widget->updateDisplay(type);
+}
+
 
 
 
