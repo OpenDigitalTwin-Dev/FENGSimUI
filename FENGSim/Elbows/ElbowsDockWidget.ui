@@ -1167,9 +1167,9 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="label_27">
+         <widget class="QLabel" name="label_29">
           <property name="font">
            <font>
             <pointsize>9</pointsize>
@@ -1181,7 +1181,7 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer">
+         <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -1194,7 +1194,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_openVTK">
+         <widget class="QPushButton" name="pushButton_openVTKgroup">
           <property name="minimumSize">
            <size>
             <width>25</width>
@@ -1220,28 +1220,16 @@
       </item>
       <item>
        <layout class="QFormLayout" name="formLayout_4">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_28">
-          <property name="text">
-           <string>数据类型：</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QComboBox" name="comboBox_dataType">
           <item>
            <property name="text">
-            <string/>
+            <string>S</string>
            </property>
           </item>
           <item>
            <property name="text">
             <string>ERROR</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>S</string>
            </property>
           </item>
           <item>
@@ -1259,6 +1247,169 @@
             <string>U</string>
            </property>
           </item>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_28">
+          <property name="text">
+           <string>数据类型：</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QFormLayout" name="formLayout_5">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_30">
+          <property name="text">
+           <string>时间歩数：</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="comboBox_timeStep"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="4">
+         <widget class="QPushButton" name="pushButton_nextFrame">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../FEMWindow.qrc">
+            <normaloff>:/fem_wind/figure/fem_wind/fem_movie.png</normaloff>:/fem_wind/figure/fem_wind/fem_movie.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="pushButton_preFrame">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../FEMWindow.qrc">
+            <normaloff>:/fem_wind/figure/fem_wind/fem_movie (copy).png</normaloff>:/fem_wind/figure/fem_wind/fem_movie (copy).png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="pushButton_firstFrame">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../FEMWindow.qrc">
+            <normaloff>:/fem_wind/figure/fem_wind/fem_movie (copy).png</normaloff>:/fem_wind/figure/fem_wind/fem_movie (copy).png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="pushButton_playBackward">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../FEMWindow.qrc">
+            <normaloff>:/fem_wind/figure/fem_wind/fem_movie (copy).png</normaloff>:/fem_wind/figure/fem_wind/fem_movie (copy).png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QPushButton" name="pushButton_playForward">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../FEMWindow.qrc">
+            <normaloff>:/fem_wind/figure/fem_wind/fem_movie.png</normaloff>:/fem_wind/figure/fem_wind/fem_movie.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QPushButton" name="pushButton_lastFrame">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../FEMWindow.qrc">
+            <normaloff>:/fem_wind/figure/fem_wind/fem_movie.png</normaloff>:/fem_wind/figure/fem_wind/fem_movie.png</iconset>
+          </property>
          </widget>
         </item>
        </layout>
@@ -1352,6 +1503,7 @@
  </widget>
  <resources>
   <include location="../MainWindow.qrc"/>
+  <include location="../FEMWindow.qrc"/>
  </resources>
  <connections/>
 </ui>

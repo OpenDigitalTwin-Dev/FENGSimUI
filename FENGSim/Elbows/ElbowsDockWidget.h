@@ -13,6 +13,7 @@
 
 #include "MainWindow.h"
 #include "Mesh/MeshThread1.h"
+#include "Visual/VTKWidget.h"
 
 namespace Ui {
 class ElbowsDockWidget;
@@ -33,6 +34,8 @@ signals:
                            double rotary_pos, double fixed_pos,
                            double arc_R, double arc_t, double arc_angle);
     void workDirChanged(const QString& newWorkDir);
+    void TypeChanged(const QString& newType);
+    void timeStepChanged(int timeStep);
 
 private slots:
     void onConfirmClicked();  //参数化建模
@@ -53,9 +56,19 @@ private slots:
     void onMeshPlot();
     void onInpClicked();
 
-    void onVTKClicked();
+    //void onVTKClicked();
+    //void onDataTypeChanged(int index);
+    void onDataTypeChanged();
+    void onVTKGroupClicked();
+    void onTimeStepChanged();
+    void initializeTimeStepComboBox(const QStringList& fileNames);
 
-    void onDataTypeChanged(int index);
+    void onpreFrameClicked();
+    void onnextFrameClicked();
+    void onfirstFrameClicked();
+    void onlastFrameClicked();
+    void onplayForwardClicked();
+    void onplayBackwardClicked();
 
 
 private:
@@ -66,6 +79,9 @@ private:
     MainWindow* mainWindow;
     MeshThread1* mth1;
     MeshModule* meshModule;
+    QStringList fileNames;  // 用于存储文件列表
+    QString newType_;
+    int timeStep;
 };
 
 

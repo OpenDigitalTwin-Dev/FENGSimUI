@@ -32,9 +32,12 @@
 
 class VTKWidget : public QVTKOpenGLWidget
 {
+    Q_OBJECT
 public:
     vtkNew<vtkScalarBarActor> scalarBar;
     vtkSmartPointer<vtkUnstructuredGridReader> reader; // 作为类的成员变量
+    // 存储多个 vtkActor 的容器
+    std::vector<vtkSmartPointer<vtkActor>> vtkActors;
 
     VTKWidget(QWidget *parent = 0);
     // add
@@ -59,10 +62,28 @@ public:
     void Hide ();
     void Reset ();
     void Clear ();
+
     void ImportVTKFile (std::string name, int type=0, int n=0);
+    void ImportVTKGroupFile (const QStringList& fileNames);
     void updateDisplay(int type);
-
-
+    //void updateGroupDisplay(int type);
+    void UpdateDisplayFrame(int frameIndex);
+    void OnNextFrameClicked();  // 声明切换到下一帧的函数
+    void OnPreFrameClicked();  // 声明切换到下一帧的函数
+    void OnFirstFrameClicked();
+    void OnLastFrameClicked();
+    void OnPlayForwardClicked();
+    void OnPlayBackwardClicked();
+    void startPlay(bool forward);
+    void stopPlay();
+    int currentFrame;    // 当前帧索引
+    QString currentType="S";     // 当前数据类型（例如，"S", "ERROR" 等）
+signals:
+    void frameChanged(int frame);
+public slots:
+    void onTypeChanged(const QString& newType);
+    void ontimeStepChanged(int timeStep);
+public:
     void ImportVTKFileCloudColorFinal(double t=0.05);
     // additive manufacturing
     void ImportVTKFileAMStlModel (std::string name);
@@ -210,6 +231,9 @@ protected:
 private:
     vtkSmartPointer<vtkRenderer> renderer;
     vtkSmartPointer<IVtkTools_ShapePicker> aPicker;
+    // 存储多个 vtkUnstructuredGrid 的容器
+    std::vector<vtkSmartPointer<vtkUnstructuredGrid>> vtkGrids;
+
     Primitives* prims;
     Boundaries* bnds;
     int ObjectId;
@@ -220,6 +244,11 @@ private:
     QTableWidget* Properties;
     CADDockWidget* cad_dw;
     PhysicsDockWidget* phy_dw;
+
+    // 定时器指针
+    QTimer* playTimer = nullptr;  // 使用单一定时器
+    bool isPlaying = false;       // 播放状态标志
+    bool isForward = true;        // 播放方向标志
 
 
 

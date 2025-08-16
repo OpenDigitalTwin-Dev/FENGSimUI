@@ -22,6 +22,10 @@ VTK_MODULE_INIT(vtkRenderingFreeType)
 
 #include <vtkSmartPointer.h>
 #include <vtkSimplePointsReader.h>
+#include <QFileDialog>
+#include "MainWindow.h"
+#include <QDebug>
+
 
 
 //double COLOR0[3] = {0.75, 0.75, 0.75};
@@ -682,6 +686,8 @@ void VTKWidget::ImportSTLFile(std::string name)
 #include "vtkDoubleArray.h"
 #include <vtkXMLUnstructuredGridReader.h>
 #include <vtkColorSeries.h>
+#include <vtkUnstructuredGrid.h>
+#include <vector>  // 用于存储多个 vtkUnstructuredGrid
 
 
 void VTKWidget::ImportVTKFile(std::string name, int type, int n)
@@ -758,106 +764,257 @@ void VTKWidget::ImportVTKFile(std::string name, int type, int n)
     GetRenderWindow()->Render();
 }
 
-//void VTKWidget::updateDisplay(int type) {
-//    if (!reader) {
-//        std::cerr << "Reader is not initialized!" << std::endl;
-//        return;
-//    }
 
-//    vtkSmartPointer<vtkDataArray> selectedScalar;
-//    QString color_name = "default";
-//    bool useScalar = true; // 是否使用标量数据着色
 
-//    // 2. 根据类型选择标量数据
-//    if (type == 0) {
-//        // 仅显示网格，不使用标量
-//        selectedScalar = nullptr;
-//        color_name = "Solid";
-//        useScalar = false;
-//    } else {
-//        if (type == 1) {
-//            selectedScalar = reader->GetOutput()->GetPointData()->GetArray("ERROR");
-//            color_name = "ERROR";
-//        } else if (type == 2) {
-//            selectedScalar = reader->GetOutput()->GetPointData()->GetArray("S");
-//            color_name = "S";
-//        } else if (type == 3) {
-//            selectedScalar = reader->GetOutput()->GetPointData()->GetArray("S_Mises");
-//            color_name = "S_Mises";
-//        } else if (type == 4) {
-//            selectedScalar = reader->GetOutput()->GetPointData()->GetArray("S_Principal");
-//            color_name = "S_Principal";
-//        } else if (type == 5) {
-//            selectedScalar = reader->GetOutput()->GetPointData()->GetArray("U");
-//            color_name = "U";
-//        }
 
-//        // 检查标量数据是否有效（非type=0时）
-//        if (!selectedScalar) {
-//            std::cerr << "No valid scalar data for type " << type << std::endl;
-//            // 可选： fallback到网格模式
-//            useScalar = false;
-//            color_name = "Solid";
-//        }
-//    }
+void VTKWidget::onTypeChanged(const QString& newType){
+    currentType = newType;
+}
+void VTKWidget::ontimeStepChanged(int timeStep){
+    currentFrame = timeStep;
+    UpdateDisplayFrame(currentFrame);
+}
+void VTKWidget::ImportVTKGroupFile(const QStringList& fileNames)
+{
+    // 清除之前的所有 actors
+    for (auto& actor : vtkActors) {
+        renderer->RemoveActor(actor);  // 移除每个 actor
+    }
+    vtkActors.clear();  // 清空保存 actor 的列表
 
-//    // 3. 创建映射器并关联数据
-//    vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
-//    mapper->SetInputConnection(reader->GetOutputPort());
+    renderer->ResetCameraClippingRange();  // 重置摄像机视距
 
-//    // 4. 处理标量数据（绑定到映射器并设置颜色映射）
-//    vtkSmartPointer<vtkLookupTable> lut = vtkSmartPointer<vtkLookupTable>::New();
-//    if (useScalar && selectedScalar) {
-//        // 4.1 绑定标量数组到映射器
-//        mapper->SetScalarModeToUsePointData(); // 使用点数据中的标量
-//        mapper->SelectColorArray(selectedScalar->GetName()); // 显式指定要使用的数组名称
+    // 读取所有的 VTK 文件
+    for (const auto& fileName : fileNames) {
+        reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
+        reader->SetFileName(fileName.toStdString().c_str());
+        reader->Update();
 
-//        // 4.2 处理向量类型（多分量）数据
-//        if (selectedScalar->GetNumberOfComponents() > 1) {
-//            mapper->SetScalarModeToUsePointFieldData(); // 处理字段数据中的向量
-//            //mapper->SetVectorModeToMagnitude(); // 用向量模长作为着色值（关键！）
-//        }
+        vtkSmartPointer<vtkDataArray> selectedScalar;
+        QString color_name = "Solid";
+        bool useScalar = true;
 
-//        // 4.3 设置标量范围和颜色映射
-//        double* range = selectedScalar->GetRange();
-//        if (range[0] == range[1]) { // 处理无效范围
-//            range[0] -= 0.1;
-//            range[1] += 0.1;
-//        }
-//        mapper->SetScalarRange(range[0], range[1]);
+        std::string typeStr = currentType.toStdString();
+        selectedScalar = reader->GetOutput()->GetPointData()->GetArray(typeStr.c_str());
+        color_name = currentType.toStdString().c_str();
+        // 检查 selectedScalar 是否有效
+        if (!selectedScalar) {
+            qWarning() << "标量数组 " << currentType << " 不存在!";
+            return;  // 或者根据需要进行其他处理
+        }
 
-//        // 配置颜色表（从蓝到红）
-//        lut->SetHueRange(0.666667, 0.0); // 蓝色(0.666)到红色(0.0)
-//        lut->Build();
-//        mapper->SetLookupTable(lut);
+        vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
+        mapper->SetInputConnection(reader->GetOutputPort());
 
-//        // 4.4 创建标量条（颜色图例）
-//        scalarBar->SetLookupTable(lut);
-//        scalarBar->SetTitle(color_name.toStdString().c_str());
-//        scalarBar->SetNumberOfLabels(10);
-//        scalarBar->SetDragable(true);
-//        renderer->AddActor2D(scalarBar);
-//    } else {
-//        // 不使用标量时，用单一颜色显示网格
-//        mapper->SetScalarVisibility(false); // 关闭标量着色
-//    }
+        // 2. 关键改进：重构标量数据处理逻辑
+        if (useScalar && selectedScalar) {
+            int numComponents = selectedScalar->GetNumberOfComponents();
 
-//    // 5. 创建Actor并添加到渲染器
-//    vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-//    actor->SetMapper(mapper);
-//    actor->GetProperty()->EdgeVisibilityOn(); // 显示网格边缘
-//    actor->GetProperty()->SetAmbient(0.25);
-//    if (!useScalar) {
-//        actor->GetProperty()->SetColor(0.8, 0.8, 0.8); // 灰色网格（无标量时）
-//    }
+            // 2.1 设置标量可见性和选择数组
+            mapper->SetScalarVisibility(true);
+            mapper->SelectColorArray(selectedScalar->GetName());
 
-//    renderer->AddActor(actor);
-//    renderer->ResetCameraClippingRange();
+            // 2.2 根据分量数采用不同处理策略
+            if (numComponents == 1) {
+                // 单分量标量（如S_Mises）
+                mapper->SetScalarModeToUsePointFieldData();
+            } else {
+                // 多分量数据（如位移U）
+                mapper->SetScalarModeToUsePointFieldData();
 
-//    // 6. 渲染更新
-//    GetRenderWindow()->Render();
-//}
+                // 关键修复：使用分量模长进行着色
+                //mapper->SetVectorModeToMagnitude();  // 必须设置！
+            }
 
+            // 2.3 标量范围处理
+            double range[2];
+            selectedScalar->GetRange(range);  // 多分量数据自动返回模长范围
+
+            // 处理无效范围
+            if (range[0] >= range[1]) {
+                range[0] = 0;
+                range[1] = 1;
+            }
+            mapper->SetScalarRange(range[0], range[1]);
+
+            // 2.4 颜色表配置
+            vtkSmartPointer<vtkLookupTable> lut = vtkSmartPointer<vtkLookupTable>::New();
+            lut->SetHueRange(0.666667, 0.0);  // Blue to Red
+            lut->SetVectorModeToMagnitude();  // 确保颜色表匹配向量模式
+            lut->Build();
+            mapper->SetLookupTable(lut);
+
+            // 2.5 标量条配置
+            scalarBar->SetLookupTable(lut);
+            scalarBar->SetTitle(color_name.toStdString().c_str());
+            scalarBar->SetNumberOfLabels(10);
+            scalarBar->SetDragable(true);
+
+            // 统一字体大小
+            scalarBar->GetLabelTextProperty()->SetFontSize(24);  // 设置标签字体大小
+            scalarBar->GetTitleTextProperty()->SetFontSize(24);  // 设置标题字体大小
+
+            // 设置统一的字体大小（固定大小）
+                    scalarBar->GetTitleTextProperty()->SetFontSize(24);
+
+            // 统一颜色条大小
+            scalarBar->SetWidth(0.1);  // 设置颜色条宽度（按比例）
+            scalarBar->SetHeight(0.8);  // 设置颜色条高度（按比例）
+
+            renderer->AddActor2D(scalarBar);
+        } else {
+            mapper->SetScalarVisibility(false);
+        }
+
+        // 3. 创建Actor（保持不变）
+        vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+        actor->SetMapper(mapper);
+        actor->GetProperty()->EdgeVisibilityOn();
+        actor->GetProperty()->SetAmbient(0.25);
+        if (!useScalar) {
+            actor->GetProperty()->SetColor(0.8, 0.8, 0.8);
+        }
+
+        // 保存读取的数据
+        vtkGrids.push_back(reader->GetOutput());
+        vtkActors.push_back(actor);  // 将 actor 保存到列表中
+    }
+
+    // 设置初始显示帧
+    currentFrame = 0;
+    UpdateDisplayFrame(currentFrame);
+}
+
+
+void VTKWidget::UpdateDisplayFrame(int frameIndex)
+{
+    currentFrame = frameIndex;
+    // 获取当前帧的 VTK 数据
+    vtkSmartPointer<vtkActor> currentActor = vtkActors[frameIndex];
+
+    // 移除之前的 vtkActor（如果有的话）
+    if (currentActor) {
+        renderer->RemoveActor(currentActor);
+    }
+
+    // 添加当前帧的 vtkActor
+    renderer->AddActor(currentActor);
+
+    // 更新颜色条和标题
+    scalarBar->SetLookupTable(currentActor->GetMapper()->GetLookupTable());
+    // scalarBar->SetTitle(("Frame " + QString::number(frameIndex)).toStdString().c_str()); // 转换为 const char*
+    renderer->AddActor2D(scalarBar);
+    renderer->ResetCameraClippingRange();
+
+    // 渲染当前帧
+    GetRenderWindow()->Render();
+    emit frameChanged(currentFrame);
+}
+
+void VTKWidget::OnPreFrameClicked()
+{
+    stopPlay();  // 停止播放，但不删除定时器
+
+    if (currentFrame <= 0) return; // 已经是第一帧
+
+    currentFrame--;
+    UpdateDisplayFrame(currentFrame);
+}
+
+void VTKWidget::OnNextFrameClicked()
+{
+    stopPlay();  // 停止播放，但不删除定时器
+
+    if (currentFrame >= static_cast<int>(vtkActors.size()) - 1) return;
+
+    currentFrame++;
+    UpdateDisplayFrame(currentFrame);
+}
+
+void VTKWidget::OnFirstFrameClicked()
+{
+    stopPlay();  // 停止播放
+
+    currentFrame = 0;
+    UpdateDisplayFrame(currentFrame);
+}
+
+void VTKWidget::OnLastFrameClicked()
+{
+    stopPlay();  // 停止播放
+
+    currentFrame = vtkActors.size() - 1;
+    UpdateDisplayFrame(currentFrame);
+}
+
+void VTKWidget::OnPlayForwardClicked()
+{
+    if (isPlaying && isForward) {
+        // 如果已经在正向播放，则停止播放
+        stopPlay();
+        return;
+    }
+
+    startPlay(true);  // 开始正向播放
+}
+
+void VTKWidget::OnPlayBackwardClicked()
+{
+    if (isPlaying && !isForward) {
+        // 如果已经在反向播放，则停止播放
+        stopPlay();
+        return;
+    }
+
+    startPlay(false); // 开始反向播放
+}
+
+void VTKWidget::startPlay(bool forward)
+{
+    stopPlay();  // 确保停止任何正在进行的播放
+
+    isPlaying = true;
+    isForward = forward;
+
+    // 创建或重用定时器
+    if (!playTimer) {
+        playTimer = new QTimer(this);
+        connect(playTimer, &QTimer::timeout, this, [this]() {
+            if (isForward) {
+                // 正向播放逻辑
+                if (currentFrame < static_cast<int>(vtkActors.size()) - 1) {
+                    currentFrame++;
+                    UpdateDisplayFrame(currentFrame);
+                } else {
+                    // 到达最后一帧时停止
+                    stopPlay();
+                }
+            } else {
+                // 反向播放逻辑
+                if (currentFrame > 0) {
+                    currentFrame--;
+                    UpdateDisplayFrame(currentFrame);
+                } else {
+                    // 到达第一帧时停止
+                    stopPlay();
+                }
+            }
+        });
+    }
+
+    playTimer->start(100); // 开始播放，每100毫秒一帧
+}
+
+void VTKWidget::stopPlay()
+{
+    isPlaying = false;
+
+    if (playTimer && playTimer->isActive()) {
+        playTimer->stop();
+    }
+}
+
+//-------------------------------------------------------------------
 void VTKWidget::updateDisplay(int type) {
     if (!reader) {
         std::cerr << "Reader is not initialized!" << std::endl;

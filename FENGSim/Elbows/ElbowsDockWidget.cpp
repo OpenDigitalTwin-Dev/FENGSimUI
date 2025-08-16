@@ -18,6 +18,11 @@
 #include "GEdge.h"
 #include "TopExp_Explorer.hxx"
 #include "QString"
+#include "Visual/VTKWidget.h"
+
+#include <vtkUnstructuredGridReader.h>
+#include <vtkUnstructuredGrid.h>
+
 
 ElbowsDockWidget::ElbowsDockWidget(QWidget *parent, MainWindow* _mainwindow)
     : QDockWidget(parent), ui(new Ui::ElbowsDockWidget)
@@ -50,6 +55,12 @@ ElbowsDockWidget::ElbowsDockWidget(QWidget *parent, MainWindow* _mainwindow)
     //连接数据类型 ComboBox 的信号到槽函数
     connect(ui->comboBox_dataType, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &ElbowsDockWidget::onDataTypeChanged);
+    connect(ui->comboBox_timeStep, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &ElbowsDockWidget::onTimeStepChanged);
+    connect(mainWindow->vtk_widget, &VTKWidget::frameChanged, this, [this](int frame) {
+        ui->comboBox_timeStep->setCurrentIndex(frame);
+    });
+
 
 
     // 连接按钮点击事件
@@ -61,8 +72,15 @@ ElbowsDockWidget::ElbowsDockWidget(QWidget *parent, MainWindow* _mainwindow)
     connect(ui->pushButton_generateMesh, &QPushButton::clicked, this, &ElbowsDockWidget::onGenerateMeshClicked);
     connect(ui->pushButton_inp, &QPushButton::clicked, this, &ElbowsDockWidget::onInpClicked);
 
-    connect(ui->pushButton_openVTK, &QPushButton::clicked, this, &ElbowsDockWidget::onVTKClicked);
+    //connect(ui->pushButton_openVTK, &QPushButton::clicked, this, &ElbowsDockWidget::onVTKClicked);
+    connect(ui->pushButton_openVTKgroup, &QPushButton::clicked, this, &ElbowsDockWidget::onVTKGroupClicked);
 
+    connect(ui->pushButton_preFrame, &QPushButton::clicked, this, &ElbowsDockWidget::onpreFrameClicked);
+    connect(ui->pushButton_nextFrame, &QPushButton::clicked, this, &ElbowsDockWidget::onnextFrameClicked);
+    connect(ui->pushButton_firstFrame, &QPushButton::clicked, this, &ElbowsDockWidget::onfirstFrameClicked);
+    connect(ui->pushButton_lastFrame, &QPushButton::clicked, this, &ElbowsDockWidget::onlastFrameClicked);
+    connect(ui->pushButton_playForward, &QPushButton::clicked, this, &ElbowsDockWidget::onplayForwardClicked);
+    connect(ui->pushButton_playBackward, &QPushButton::clicked, this, &ElbowsDockWidget::onplayBackwardClicked);
 
 
 
@@ -313,25 +331,6 @@ void ElbowsDockWidget::onStepClicked(){
     }
 }
 
-//void ElbowsDockWidget::onInpClicked(){
-//    // 创建 QProcess 对象
-//    QProcess *process = new QProcess(this);
-//    // 构建 Python 脚本执行的命令
-//    QString pythonCommand = "python3";
-
-//    //路径问题解决
-//    QString appDirPath = QCoreApplication::applicationDirPath();
-//    QDir dir(appDirPath);
-//    dir.cdUp();
-//    QString parentDirPath = dir.absolutePath(); //"/home/ysy/FENGSim/starter"
-//    qDebug() << "" << parentDirPath;
-
-//    QString scriptPath = parentDirPath + "/FENGSim/Elbows/config/GenerateInp.py";
-//    qDebug() << "" << scriptPath;
-//    // 启动 Python 脚本
-//    process->start(pythonCommand, QStringList() << scriptPath);
-//}
-
 void ElbowsDockWidget::onInpClicked() {
     // 创建 QProcess 对象
     QProcess *process = new QProcess(this);
@@ -389,32 +388,96 @@ void ElbowsDockWidget::onInpClicked() {
     }
 }
 
-void ElbowsDockWidget::onVTKClicked() {
-    // 打开文件对话框，选择文件
-    QString filePath = QFileDialog::getOpenFileName(this, tr("Open VTK File"), "", tr("VTK Files (*.vtk)"));
+//void ElbowsDockWidget::onVTKClicked() {
+//    // 打开文件对话框，选择文件
+//    QString filePath = QFileDialog::getOpenFileName(this, tr("Open VTK File"), "", tr("VTK Files (*.vtk)"));
 
-    // 如果文件路径不为空，进行可视化展示
-    if (!filePath.isEmpty()) {
-        mainWindow->vtk_widget->Hide();
-        mainWindow->vtk_widget->ImportVTKFile(filePath.toStdString());
-        mainWindow->vtk_widget->Fit();
+//    // 如果文件路径不为空，进行可视化展示
+//    if (!filePath.isEmpty()) {
+//        mainWindow->vtk_widget->Hide();
+//        mainWindow->vtk_widget->ImportVTKFile(filePath.toStdString());
+//        mainWindow->vtk_widget->Fit();
+//    }
+//}
+
+
+void ElbowsDockWidget::onDataTypeChanged(){
+    newType_ = ui->comboBox_dataType->currentText();
+    emit TypeChanged(newType_);
+    mainWindow->vtk_widget->Hide();
+    mainWindow->vtk_widget->ImportVTKGroupFile(fileNames);
+    mainWindow->vtk_widget->Fit();
+}
+
+void ElbowsDockWidget::onVTKGroupClicked() {
+    // 打开文件对话框选择多个文件
+    fileNames = QFileDialog::getOpenFileNames(this, tr("Open VTK Files"), "", tr("VTK Files (*.vtk)"));
+
+    if (fileNames.isEmpty()) return;  // 如果没有选择文件，返回
+
+    mainWindow->vtk_widget->Hide();
+    mainWindow->vtk_widget->ImportVTKGroupFile(fileNames);
+    mainWindow->vtk_widget->Fit();
+    initializeTimeStepComboBox(fileNames);
+}
+
+void ElbowsDockWidget::initializeTimeStepComboBox(const QStringList& fileNames) {
+    // 清空现有的下拉框项
+    ui->comboBox_timeStep->clear();
+
+    // 这里假设你每个文件的帧数相同
+    int numFrames = 0;
+
+    // 读取每个文件获取帧数
+    for (const QString& fileName : fileNames) {
+        vtkSmartPointer<vtkUnstructuredGridReader> reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
+        reader->SetFileName(fileName.toStdString().c_str());
+        reader->Update();
+
+        // 获取文件的帧数
+        numFrames = mainWindow->vtk_widget->vtkActors.size();
+    }
+
+    // 将帧数填充到下拉框中
+    for (int i = 0; i < numFrames; ++i) {
+        ui->comboBox_timeStep->addItem(QString::number(i)); // 根据帧索引填充
+    }
+
+    // 默认选择第一帧
+    if (numFrames > 0) {
+        ui->comboBox_timeStep->setCurrentIndex(0); // 默认选择第一个时间步
     }
 }
 
-void ElbowsDockWidget::onDataTypeChanged(int index) {
-    // 获取下拉框的选择索引
-    int type = 0;
-    switch (index) {
-        case 0: type = 0; break;  // Solid
-        case 1: type = 1; break;  // ERROR
-        case 2: type = 2; break;  // S
-        case 3: type = 3; break;  // S_Mises
-        case 4: type = 4; break;  // S_Principal
-        case 5: type = 5; break;  // U
-    }
+void ElbowsDockWidget::onTimeStepChanged()
+{
+    timeStep = ui->comboBox_timeStep->currentText().toInt();
+    // 发送信号更新 VTKWidget 显示帧
+    emit timeStepChanged(timeStep);
+}
 
-    // 调用 vtk_widget 中的方法更新显示
-    mainWindow->vtk_widget->updateDisplay(type);
+void ElbowsDockWidget::onnextFrameClicked() {
+    mainWindow->vtk_widget->OnNextFrameClicked();
+}
+
+void ElbowsDockWidget::onpreFrameClicked() {
+    mainWindow->vtk_widget->OnPreFrameClicked();
+}
+
+void ElbowsDockWidget::onfirstFrameClicked() {
+    mainWindow->vtk_widget->OnFirstFrameClicked();
+}
+
+void ElbowsDockWidget::onlastFrameClicked() {
+    mainWindow->vtk_widget->OnLastFrameClicked();
+}
+
+void ElbowsDockWidget::onplayForwardClicked() {
+    mainWindow->vtk_widget->OnPlayForwardClicked();
+}
+
+void ElbowsDockWidget::onplayBackwardClicked() {
+    mainWindow->vtk_widget->OnPlayBackwardClicked();
 }
 
 

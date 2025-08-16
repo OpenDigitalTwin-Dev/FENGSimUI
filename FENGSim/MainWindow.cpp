@@ -741,8 +741,14 @@ void MainWindow::OpenElbowsModule()
                connect(elbowsDock, &ElbowsDockWidget::confirmParameters,
                        this, &MainWindow::onElbowsParametersConfirmed);
                // 连接信号槽
-                      connect(elbowsDock, &ElbowsDockWidget::workDirChanged,
-                              this, &MainWindow::onWorkDirChanged);
+              connect(elbowsDock, &ElbowsDockWidget::workDirChanged,
+                      this, &MainWindow::onWorkDirChanged);
+              // ✅ 正确连接信号和槽
+              connect(elbowsDock, &ElbowsDockWidget::TypeChanged,
+                      vtk_widget, &VTKWidget::onTypeChanged);
+              // ✅ 正确连接信号和槽
+              connect(elbowsDock, &ElbowsDockWidget::timeStepChanged,
+                      vtk_widget, &VTKWidget::ontimeStepChanged);
            }
 
            elbowsDock->show();
