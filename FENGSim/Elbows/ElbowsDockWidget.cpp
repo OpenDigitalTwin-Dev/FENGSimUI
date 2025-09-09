@@ -82,6 +82,8 @@ ElbowsDockWidget::ElbowsDockWidget(QWidget *parent, MainWindow* _mainwindow)
     connect(ui->pushButton_playForward, &QPushButton::clicked, this, &ElbowsDockWidget::onplayForwardClicked);
     connect(ui->pushButton_playBackward, &QPushButton::clicked, this, &ElbowsDockWidget::onplayBackwardClicked);
 
+    connect(ui->pushButton_openVTKlast, &QPushButton::clicked, this, &ElbowsDockWidget::onVTKlastClicked);
+
 
 
     this->setMinimumWidth(250);  // 最小宽度
@@ -388,19 +390,6 @@ void ElbowsDockWidget::onInpClicked() {
     }
 }
 
-//void ElbowsDockWidget::onVTKClicked() {
-//    // 打开文件对话框，选择文件
-//    QString filePath = QFileDialog::getOpenFileName(this, tr("Open VTK File"), "", tr("VTK Files (*.vtk)"));
-
-//    // 如果文件路径不为空，进行可视化展示
-//    if (!filePath.isEmpty()) {
-//        mainWindow->vtk_widget->Hide();
-//        mainWindow->vtk_widget->ImportVTKFile(filePath.toStdString());
-//        mainWindow->vtk_widget->Fit();
-//    }
-//}
-
-
 void ElbowsDockWidget::onDataTypeChanged(){
     newType_ = ui->comboBox_dataType->currentText();
     emit TypeChanged(newType_);
@@ -479,6 +468,137 @@ void ElbowsDockWidget::onplayForwardClicked() {
 void ElbowsDockWidget::onplayBackwardClicked() {
     mainWindow->vtk_widget->OnPlayBackwardClicked();
 }
+
+void ElbowsDockWidget::onVTKlastClicked() {
+    // 打开文件对话框选择一个文件，并且只能选择 .vtk 或 .vtu 文件
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open VTK or VTU File"), "", tr("VTK Files (*.vtk);;VTU Files (*.vtu)"));
+    if (fileName.isEmpty()) return;  // 如果没有选择文件，返回
+    qDebug() << "finished" ;
+
+    // 获取应用程序目录
+    QString appDirPath = QCoreApplication::applicationDirPath();
+
+    // 使用 QDir 来拼接路径，避免重复拼接
+    QDir scriptDir(appDirPath);
+    QString centerlinePath = scriptDir.filePath("data/mesh/final_centerline.vtk");
+    QString scriptPath1 = scriptDir.filePath("data/mesh/angle.py");
+    QString scriptPath2 = scriptDir.filePath("data/mesh/extract_centerline.py");
+    QString scriptPath3 = scriptDir.filePath("data/mesh/analyze_thickness.py");
+    // qDebug() << "Script Path1: " << scriptPath1;
+
+    // 确定 Python 解释器的路径
+    QString pythonCommand = "/home/ysy/myenv/bin/python3";  // 使用绝对路径来确保正确的解释器
+
+    // 创建进程并执行Python脚本
+    QProcess process1;
+    process1.start(pythonCommand, QStringList() << scriptPath1 << fileName);
+
+    if (process1.waitForFinished()) {
+            QByteArray output = process1.readAllStandardOutput();
+            // 解析输出获取角度值
+            bool ok;
+            double angle = output.trimmed().toDouble(&ok);
+            ui->lineEdit_ReboundAngle->setText(QString::number(angle, 'f', 2));
+            if (ok) {
+                // 使用计算得到的角度
+                qDebug() << "Elbow angle:" << angle;
+            } else {
+                qWarning() << "Failed to parse angle from output:" << output;
+            }
+        } else {
+            qWarning() << "Python process failed:" << process1.errorString();
+        }
+
+    QProcess process2;
+        process2.start(pythonCommand, QStringList() << scriptPath2 << fileName);
+
+        if (!process2.waitForStarted()) {
+            qWarning() << "Failed to start Python process:" << process2.errorString();
+            return;
+        }
+
+        if (process2.waitForFinished(120000)) { // 120秒超时
+            QByteArray output = process2.readAllStandardOutput();
+            QByteArray error = process2.readAllStandardError();
+            int exitCode = process2.exitCode();
+
+            qDebug() << "Exit code:" << exitCode;
+            qDebug() << "Python stdout:" << output;
+            qDebug() << "Python stderr:" << error;
+
+            if (exitCode == 0) {
+                if (output.contains("SUCCESS")) {
+                    qDebug() << "Centerline generated successfully";
+                    // 在这里处理生成的中心线文件
+                } else {
+                    qWarning() << "Failed to generate centerline:" << output;
+                }
+            } else {
+                qWarning() << "Python script execution failed. Exit code:" << exitCode;
+            }
+        } else {
+            qWarning() << "Python process timeout:" << process2.errorString();
+            process2.kill();
+        }
+
+    // 检查中心线文件是否存在
+        if (!QFile::exists(centerlinePath)) {
+            qWarning() << "Centerline file does not exist:" << centerlinePath;
+            return;
+        }
+
+    QProcess process3;
+        process3.start(pythonCommand, QStringList() << scriptPath3 << fileName << centerlinePath);
+
+        if (!process3.waitForStarted()) {
+            qWarning() << "Failed to start Python process:" << process3.errorString();
+            return;
+        }
+
+        if (process3.waitForFinished(300000)) { // 300秒超时（可能需要更长时间）
+            QByteArray output = process3.readAllStandardOutput();
+            QByteArray error = process3.readAllStandardError();
+            int exitCode = process3.exitCode();
+
+            qDebug() << "Exit code:" << exitCode;
+            qDebug() << "Python stdout:" << output;
+            qDebug() << "Python stderr:" << error;
+
+            if (exitCode == 0) {
+                // 解析输出（格式为：min_thickness,max_thickness,max_ovality）
+                QString outputStr = QString::fromUtf8(output).trimmed();
+                QStringList values = outputStr.split(",");
+
+                if (values.size() == 3) {
+                    bool ok1, ok2, ok3;
+                    double minThickness = values[0].toDouble(&ok1);
+                    double maxThickness = values[1].toDouble(&ok2);
+                    double maxOvality = values[2].toDouble(&ok3);
+                    ui->lineEdit_MinThickness->setText(QString::number(minThickness, 'f', 3));
+                    ui->lineEdit_MaxThickness->setText(QString::number(maxThickness, 'f', 3));
+                    ui->lineEdit_MaxOvality->setText(QString::number(maxOvality, 'f', 3));
+
+                    if (ok1 && ok2 && ok3) {
+                        qDebug() << "Min Thickness:" << minThickness;
+                        qDebug() << "Max Thickness:" << maxThickness;
+                        qDebug() << "Max Ovality:" << maxOvality;
+
+                        // 在这里使用计算结果
+                    } else {
+                        qWarning() << "Failed to parse output values:" << outputStr;
+                    }
+                } else {
+                    qWarning() << "Unexpected output format:" << outputStr;
+                }
+            } else {
+                qWarning() << "Python script execution failed. Exit code:" << exitCode;
+            }
+        } else {
+            qWarning() << "Python process timeout:" << process3.errorString();
+            process3.kill();
+        }
+}
+
 
 
 

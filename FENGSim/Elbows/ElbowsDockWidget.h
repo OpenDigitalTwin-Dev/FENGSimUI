@@ -70,6 +70,8 @@ private slots:
     void onplayForwardClicked();
     void onplayBackwardClicked();
 
+    void onVTKlastClicked();
+
 
 private:
     Ui::ElbowsDockWidget *ui;
