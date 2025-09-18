@@ -121,6 +121,7 @@ FORMS    += \
     Transport/TransportDockWidget.ui
 
 RESOURCES += \
+    ElbowWindow.qrc \
     MainWindow.qrc \
     MeshWindow.qrc \
     FEMWindow.qrc \

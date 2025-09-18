@@ -33,9 +33,9 @@ ElbowsDockWidget::ElbowsDockWidget(QWidget *parent, MainWindow* _mainwindow)
     // 初始化材料映射关系
     initializeMaterialMap();
 
-    connect(ui->pushButton_newFile, &QPushButton::clicked, this, &ElbowsDockWidget::onNewFileClicked);
-    connect(ui->pushButton_openFile, &QPushButton::clicked, this, &ElbowsDockWidget::onOpenFileClicked);
-    connect(ui->pushButton_saveFile, &QPushButton::clicked, this, &ElbowsDockWidget::onSaveFileClicked);
+//    connect(ui->pushButton_newFile, &QPushButton::clicked, this, &ElbowsDockWidget::onNewFileClicked);
+//    connect(ui->pushButton_openFile, &QPushButton::clicked, this, &ElbowsDockWidget::onOpenFileClicked);
+//    connect(ui->pushButton_saveFile, &QPushButton::clicked, this, &ElbowsDockWidget::onSaveFileClicked);
 
 
 

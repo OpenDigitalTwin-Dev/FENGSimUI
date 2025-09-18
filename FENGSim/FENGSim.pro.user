@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.13.1, 2025-09-09T16:37:51. -->
+<!-- Written by QtCreator 4.13.1, 2025-09-18T09:54:44. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -312,9 +312,8 @@
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">FENGSim2</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/ysy/FENGSim/starter/FENGSim/FENGSim.pro</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/home/ysy/FENGSim/starter/FENGSim/FENGSim.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/media/ysy/YSY-USB/FENGSim/starter/FENGSim/FENGSim.pro</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/media/ysy/YSY-USB/FENGSim/starter/FENGSim/FENGSim.pro</value>
     <value type="bool" key="RunConfiguration.Arguments.multi">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
@@ -322,7 +321,6 @@
     <value type="bool" key="RunConfiguration.UseMultiProcess">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/ysy/FENGSim/starter/build-FENGSim-Desktop_Qt_5_12_12_GCC_64bit-Debug</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>
@@ -362,7 +360,6 @@
    <value type="QString">ProjectExplorer.Project.Target.0/ProjectExplorer.Target.RunConfiguration.0</value>
    <value type="QString">ProjectExplorer.Project.Target.0/ProjectExplorer.Target.RunConfiguration.0/ProjectExplorer.ProjectConfiguration.Id</value>
    <value type="QString">ProjectExplorer.Project.Target.0/ProjectExplorer.Target.RunConfiguration.0/ProjectExplorer.RunConfiguration.BuildKey</value>
-   <value type="QString">ProjectExplorer.Project.Target.0/ProjectExplorer.Target.RunConfiguration.0/RunConfiguration.WorkingDirectory.default</value>
   </valuelist>
  </data>
  <data>

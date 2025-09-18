@@ -99967,12 +99967,12 @@
 *Solid Section, elset=Rotation-Circle, material=RigidBody
 
 *NODE
-20035,  169.999,   -50,   0
-20036,  169.999,   -50,   0
-20037,  180,   0,   0
-20038,  169.999,   -50,   0
-20039,  75,   0,   0
-20040,  75,   0,   0
+20035,  249.999,   -80,   0
+20036,  249.999,   -80,   0
+20037,  260,   0,   0
+20038,  249.999,   -80,   0
+20039,  125,   0,   0
+20040,  125,   0,   0
 
 *Nset, nset=Rotation-Tube_ref
 20035
@@ -100027,9 +100027,9 @@ Rotation-Circle_rot, 1, 3
 0.01, 1, 1e-08, 1
 
 *Boundary, amplitude=AMP-1
-Rotation-Tube_rot, 1, 1, -1.727
+Rotation-Tube_rot, 1, 1, -3.3
 *Boundary, amplitude=AMP-1
-Rotation-Circle_rot, 1, 1, -1.727
+Rotation-Circle_rot, 1, 1, -3.3
 
 ** 结果输出
 *node file, frequency=1

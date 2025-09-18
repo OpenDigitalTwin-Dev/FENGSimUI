@@ -616,8 +616,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="MainWindow.qrc">
-     <normaloff>:/main_wind/figure/main_wind/cad.png</normaloff>:/main_wind/figure/main_wind/cad.png</iconset>
+    <iconset resource="CADWindow.qrc">
+     <normaloff>:/cad_wind/figure/cad_wind/pipe.png</normaloff>:/cad_wind/figure/cad_wind/pipe.png</iconset>
    </property>
    <property name="text">
     <string>Elbows</string>
@@ -634,8 +634,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="MainWindow.qrc">
-     <normaloff>:/main_wind/figure/main_wind/visual.png</normaloff>:/main_wind/figure/main_wind/visual.png</iconset>
+    <iconset resource="CADWindow.qrc">
+     <normaloff>:/cad_wind/figure/cad_wind/rivet.png</normaloff>:/cad_wind/figure/cad_wind/rivet.png</iconset>
    </property>
    <property name="text">
     <string>Riveting</string>
@@ -656,15 +656,15 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="MeasureWidnow.qrc"/>
-  <include location="Machining/machining.qrc"/>
-  <include location="TransportWindow.qrc"/>
-  <include location="System.qrc"/>
-  <include location="CADWindow.qrc"/>
-  <include location="MainWindow.qrc"/>
-  <include location="OCPoro.qrc"/>
-  <include location="SPCWindow.qrc"/>
   <include location="MeshWindow.qrc"/>
+  <include location="OCPoro.qrc"/>
+  <include location="Machining/machining.qrc"/>
+  <include location="MeasureWidnow.qrc"/>
+  <include location="TransportWindow.qrc"/>
+  <include location="MainWindow.qrc"/>
+  <include location="CADWindow.qrc"/>
+  <include location="System.qrc"/>
+  <include location="SPCWindow.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -50,5 +50,7 @@
         <file>figure/cad_wind/point_selected.png</file>
         <file>figure/cad_wind/selected_bnd.png</file>
         <file>figure/cad_wind/selected_domain.png</file>
+        <file>figure/cad_wind/pipe.png</file>
+        <file>figure/cad_wind/rivet.png</file>
     </qresource>
 </RCC>
